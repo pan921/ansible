@@ -1,0 +1,12 @@
+---
+- name: restart sshd
+  service: name=ssh.service state=restarted enabled=yes
+
+- name: restart fail2ban 
+  service: name=fail2ban state=restarted enabled=yes
+
+- name: restart ntp
+  service: name=ntp state=restarted enabled=yes
+
+- name: restart docker
+  service: name=docker state=restarted enabled=yes

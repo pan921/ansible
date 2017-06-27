@@ -1,0 +1,10 @@
+---
+- name: Initial Configure Debian
+  hosts: all
+  remote_user: pavel
+  become: true
+  become_user: root
+
+  roles:
+    - safe-server-debian
+

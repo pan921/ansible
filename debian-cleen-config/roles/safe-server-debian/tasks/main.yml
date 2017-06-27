@@ -1,0 +1,59 @@
+---
+    - name: Update apt packages for debian
+      apt: update_cache=yes
+      apt: upgrade=yes
+      
+    - name: Install packages aptitude,fail2ban,ntp,apt-transport-https,ca-certificates,curl,gnupg2,software-properties-common
+      apt: name={{ item }} state=present
+      with_items:
+       - aptitude
+       - fail2ban
+       - ntp
+       - apt-transport-https
+       - ca-certificates
+       - curl
+       - gnupg2
+       - software-properties-common
+ 
+    - name: Upgrade installed packages
+      apt: upgrade=yes
+      
+    - name: Set timezone Europe/Moscow
+      timezone: name=Europe/Moscow
+
+      notify: restart fail2ban
+    
+      notify: restart ntp
+
+    - name: create user 
+      user: name={{ user }} password={{ password }} shell=/bin/bash home=/home/{{ user }} 
+      
+    - name: set authorized key took from file for deploy
+      authorized_key: user=deploy state=present key= '{{ item }}' #"{{ lookup('file','roles/safe-server-debian/authorized_keys//id_rsa.pub')}}"  
+      
+    - name: Copy sshd config file
+      copy: src=sshd_config dest=/etc/ssh/sshd_config
+      notify: restart sshd	
+
+    - name: Copy iptables.rules config file
+      copy: src=iptables.rules dest=/etc/iptables.rules
+    
+    - name: Activate rules for iptables
+      shell: iptables-restore < /etc/iptables.rules
+
+    - name: Copy startup file for iptables
+      copy: src=iptables dest=/etc/network/if-pre-up.d/iptables
+
+    - name: Take executable script for iptables
+      shell: chmod +x /etc/network/if-pre-up.d/iptables
+         
+    - name: Add Docker.s official GPG key
+      shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+
+    - name: Add docker repository
+      apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/debian jessie stable' state=present
+
+    - name: Install docker-ce
+      apt: name=docker-ce state=present
+      notify: restart docker
+

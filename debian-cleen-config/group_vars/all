@@ -1,0 +1,6 @@
+# This name will be set on new Debian server
+user : deploy
+
+# This password will be set for user - Deploy. 
+# Password created with command python -c 'import crypt; print crypt.crypt("123", "deploy")'
+password: de67v5bC9a4sk 
